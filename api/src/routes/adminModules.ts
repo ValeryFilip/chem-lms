@@ -37,9 +37,9 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   const { title, order, courseId } = req.body;
 
-  if (!title || order === undefined || !courseId) {
+  if (!title || !courseId) {
     return res.status(400).json({
-      error: "title, order and courseId are required",
+      error: "title and courseId are required",
     });
   }
 
@@ -51,10 +51,20 @@ router.post("/", async (req, res) => {
     return res.status(404).json({ error: "Course not found" });
   }
 
+  let nextOrder = order;
+
+  if (nextOrder === undefined) {
+    const modulesCount = await prisma.module.count({
+      where: { courseId },
+    });
+
+    nextOrder = modulesCount + 1;
+  }
+
   const moduleItem = await prisma.module.create({
     data: {
       title,
-      order,
+      order: nextOrder,
       courseId,
     },
   });
@@ -90,14 +100,11 @@ router.patch("/:id/lessons/reorder", async (req, res) => {
   const sameLength = existingLessonIds.length === lessonIds.length;
   const sameIds =
     sameLength &&
-    existingLessonIds.every((lessonId) =>
-      lessonIds.includes(lessonId)
-    );
+    existingLessonIds.every((lessonId) => lessonIds.includes(lessonId));
 
   if (!sameIds) {
     return res.status(400).json({
-      error:
-        "lessonIds must contain all module lesson ids exactly once",
+      error: "lessonIds must contain all module lesson ids exactly once",
     });
   }
 

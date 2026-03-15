@@ -32,24 +32,34 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   const { title, order, moduleId, isPublished } = req.body;
 
-  if (!title || order === undefined || !moduleId) {
+  if (!title || !moduleId) {
     return res.status(400).json({
-      error: "title, order and moduleId are required",
+      error: "title and moduleId are required",
     });
   }
 
-  const module = await prisma.module.findUnique({
+  const moduleItem = await prisma.module.findUnique({
     where: { id: moduleId },
   });
 
-  if (!module) {
+  if (!moduleItem) {
     return res.status(404).json({ error: "Module not found" });
+  }
+
+  let nextOrder = order;
+
+  if (nextOrder === undefined) {
+    const lessonsCount = await prisma.lesson.count({
+      where: { moduleId },
+    });
+
+    nextOrder = lessonsCount + 1;
   }
 
   const lesson = await prisma.lesson.create({
     data: {
       title,
-      order,
+      order: nextOrder,
       moduleId,
       isPublished: Boolean(isPublished),
     },

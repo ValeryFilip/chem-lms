@@ -103,3 +103,72 @@ export async function getAdminCourseById(id: string) {
   const { data } = await api.get<AdminCourseDetail>(`/admin/courses/${id}`);
   return data;
 }
+
+export async function publishAdminCourse(id: string) {
+  const { data } = await api.post(`/admin/courses/${id}/publish`);
+  return data;
+}
+
+export async function unpublishAdminCourse(id: string) {
+  const { data } = await api.post(`/admin/courses/${id}/unpublish`);
+  return data;
+}
+
+export async function createAdminModule(courseId: string, title: string) {
+  const { data } = await api.post("/admin/modules", {
+    courseId,
+    title,
+  });
+  return data;
+}
+
+export async function createAdminLesson(moduleId: string, title: string) {
+  const { data } = await api.post("/admin/lessons", {
+    moduleId,
+    title,
+  });
+  return data;
+}
+
+export async function createAdminStep(
+  lessonId: string,
+  title: string,
+  type: string
+) {
+  const { data } = await api.post("/admin/steps", {
+    lessonId,
+    title,
+    type,
+  });
+  return data;
+}
+
+export async function reorderAdminCourseModules(
+  courseId: string,
+  moduleIds: string[]
+) {
+  const { data } = await api.patch(`/admin/courses/${courseId}/modules/reorder`, {
+    moduleIds,
+  });
+  return data;
+}
+
+export async function reorderAdminModuleLessons(
+  moduleId: string,
+  lessonIds: string[]
+) {
+  const { data } = await api.patch(`/admin/modules/${moduleId}/lessons/reorder`, {
+    lessonIds,
+  });
+  return data;
+}
+
+export async function reorderAdminLessonSteps(
+  lessonId: string,
+  stepIds: string[]
+) {
+  const { data } = await api.patch(`/admin/lessons/${lessonId}/steps/reorder`, {
+    stepIds,
+  });
+  return data;
+}
